@@ -320,7 +320,7 @@ fn do_job(job: &Job) -> Result<Output> {
     Ok(output)
 }
 
-async fn handle_job(job: job::Job) -> Result<()> {
+async fn handle_job(job: Box<job::Job>) -> Result<()> {
     update_check_run(
         &job,
         UpdateCheckRunBuilder::default()
@@ -367,7 +367,7 @@ async fn recover_from_journal(journal: &Arc<Mutex<job::JobJournal>>) {
         // Done this way to avoid a deadlock
         let job = journal.lock().await.get_job();
         if let Some(job) = job {
-            if let Err(e) = handle_job(job).await {
+            if let Err(e) = handle_job(Box::new(job)).await {
                 eprintln!("Error handling job: {}", e);
             }
             journal.lock().await.complete_job().await;
@@ -377,7 +377,7 @@ async fn recover_from_journal(journal: &Arc<Mutex<job::JobJournal>>) {
     }
 }
 
-pub async fn handle_jobs(job_receiver: Receiver<job::Job>, journal: Arc<Mutex<job::JobJournal>>) {
+pub async fn handle_jobs(job_receiver: Receiver<Box<job::Job>>, journal: Arc<Mutex<job::JobJournal>>) {
     eprintln!("Starting job handler");
     recover_from_journal(&journal).await;
     loop {

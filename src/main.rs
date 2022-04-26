@@ -91,9 +91,7 @@ async fn rocket() -> _ {
 
     let (job_sender, job_receiver) = flume::unbounded();
     let journal_clone = journal.clone();
-    std::thread::spawn(move || {
-        handle.spawn(async move { job_processor::handle_jobs(job_receiver, journal_clone).await })
-    });
+    handle.spawn(async move { job_processor::handle_jobs(job_receiver, journal_clone).await });
 
     rocket
         .manage(job::JobSender(job_sender))

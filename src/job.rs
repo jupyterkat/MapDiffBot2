@@ -14,7 +14,7 @@ pub struct Job {
     pub installation_id: u64,
 }
 
-pub struct JobSender(pub Sender<Job>);
+pub struct JobSender(pub Sender<Box<Job>>);
 
 //TODO: Integrate journaling and channel into some sort of queue?
 pub struct JobJournal {

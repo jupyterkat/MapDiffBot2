@@ -93,7 +93,7 @@ async fn process_pull(
     .context("Marking check run as queued")?;
 
     journal.lock().await.add_job(job.clone()).await;
-    job_sender.0.send_async(job).await?;
+    job_sender.0.send_async(Box::new(job)).await?;
 
     Ok(())
 }
